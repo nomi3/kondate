@@ -44,7 +44,7 @@ export default {
   },
   methods: {
     addItem: function () {
-      if (this.url !== '') {
+      if (this.checkUrl()) {
         this.items.unshift({
           message: this.url
         })
@@ -61,6 +61,7 @@ export default {
     },
     checkUrl: function () {
       // 語頭が白ごはんかyoutubeなのを確認する
+      return this.url.startsWith('https://')
     }
   }
 }
