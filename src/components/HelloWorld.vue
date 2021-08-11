@@ -1,16 +1,17 @@
 <template>
   <div>
-    <input v-model="url" placeholder="url here">
+    <input v-model="inputUrl" placeholder="url here">
     <button v-on:click="addItem">add url</button>
     <table>
       <tbody>
-        <tr v-for="(item, index) in items" :key="index">
-            <td>{{ item.message }}</td>
+        <tr v-for="(url, index) in urls" :key="index">
+            <td>{{ url }}</td>
             <td><button v-on:click="deleteItem(item)">delete</button></td>
         </tr>
       </tbody>
     </table>
-    <button v-if="items.length" v-on:click="createList">create kaimono list</button>
+    <button v-if="urls.length" v-on:click="createList">create kaimono list</button>
+    <p v-show="isLoading">Just a minute, please...</p>
     <table v-if="results.length">
       <tbody>
         <tr v-for="(result, index) in results" :key="index">
@@ -28,35 +29,40 @@ export default {
   name: 'HelloWorld',
   data () {
     return {
-      url: '',
-      items: [],
-      results: []
+      inputUrl: '',
+      urls: [],
+      results: [],
+      isLoading: false
     }
   },
   methods: {
     addItem: function () {
       if (this.checkUrl()) {
-        this.items.unshift({
-          message: this.url
-        })
-        this.url = ''
+        this.urls.unshift(this.inputUrl)
+        this.inputUrl = ''
       } else {
         alert('白ごはん.comかYouTubeのURLを入力してください');
       }
     },
     deleteItem: function (item) {
-      var index = this.items.indexOf(item)
-      this.items.splice(index, 1)
+      var index = this.urls.indexOf(item)
+      this.urls.splice(index, 1)
     },
     createList: async function () {
       console.log('kondate!')
-      const response = await axios.get('https://kondate-api.herokuapp.com/test')
+      this.isLoading = true
+      const response = await axios.get('https://kondate-api.herokuapp.com/test', {
+        params: {
+          urls: this.urls
+        }
+      })
       console.log(response.data)
+      this.isLoading = false
       this.results = response.data
     },
     checkUrl: function () {
       // 語頭が白ごはんかyoutubeなのを確認する
-      return this.url.startsWith('https://')
+      return this.inputUrl.startsWith('https://')
     }
   }
 }
