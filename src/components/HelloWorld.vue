@@ -10,7 +10,7 @@
         </tr>
       </tbody>
     </table>
-    <button v-if="items.length" v-on:click="create">create kaimono list</button>
+    <button v-if="items.length" v-on:click="createList">create kaimono list</button>
     <table v-if="results.length">
       <tbody>
         <tr v-for="(result, index) in results" :key="index">
@@ -23,23 +23,14 @@
 </template>
 
 <script>
+import axios from 'axios'
 export default {
   name: 'HelloWorld',
   data () {
     return {
       url: '',
       items: [],
-      results: [],
-      mockList: [
-        {
-          name: 'じゃがいも',
-          amount: '2個'
-        },
-        {
-          name: 'にんじん',
-          amount: '2本'
-        }
-      ]
+      results: []
     }
   },
   methods: {
@@ -49,15 +40,19 @@ export default {
           message: this.url
         })
         this.url = ''
+      } else {
+        alert('白ごはん.comかYouTubeのURLを入力してください');
       }
     },
     deleteItem: function (item) {
       var index = this.items.indexOf(item)
       this.items.splice(index, 1)
     },
-    create: function () {
+    createList: async function () {
       console.log('kondate!')
-      this.results = this.mockList
+      const response = await axios.get('https://kondate-api.herokuapp.com/test')
+      console.log(response.data)
+      this.results = response.data
     },
     checkUrl: function () {
       // 語頭が白ごはんかyoutubeなのを確認する
@@ -67,7 +62,6 @@ export default {
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 h1, h2 {
   font-weight: normal;
