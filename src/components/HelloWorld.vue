@@ -12,6 +12,7 @@
     </table>
     <button v-if="urls.length" v-on:click="createList">create kaimono list</button>
     <p v-show="isLoading">Just a minute, please...</p>
+    <p v-show="error">Some error occured...</p>
     <table v-if="results.length">
       <tbody>
         <tr v-for="(result, index) in results" :key="index">
@@ -32,11 +33,13 @@ export default {
       inputUrl: '',
       urls: [],
       results: [],
-      isLoading: false
+      isLoading: false,
+      error: false
     }
   },
   methods: {
     addItem: function () {
+      this.error = false
       if (this.checkUrl()) {
         this.urls.unshift(this.inputUrl)
         this.inputUrl = ''
@@ -45,16 +48,19 @@ export default {
       }
     },
     deleteItem: function (item) {
+      this.error = false
       var index = this.urls.indexOf(item)
       this.urls.splice(index, 1)
     },
     createList: async function () {
       console.log('kondate!')
+      this.error = false
       this.isLoading = true
-      const response = await axios.get('https://kondate-api.herokuapp.com/test', {
-        params: {
-          urls: this.urls
-        }
+      const response = await axios.post('https://kondate-api.herokuapp.com/test', {
+        urls: this.urls
+      }).catch(() => {
+        this.isLoading = false
+        this.error = true
       })
       console.log(response.data)
       this.isLoading = false
