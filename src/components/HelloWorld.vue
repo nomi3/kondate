@@ -14,10 +14,26 @@
     <div v-show="isLoading" class="loader">Loading...</div>
     <p v-show="error">Some error occured...</p>
     <table v-if="results.length">
+      <thead>
+        <tr>
+          <th @click="sortByChecked">▼</th>
+          <th>name</th>
+          <th>amount</th>
+        </tr>
+      </thead>
       <tbody>
         <tr v-for="(result, index) in results" :key="index">
-            <td>{{ result.name }}</td>
-            <td>{{ result.amount }}</td>
+          <td><input type="checkbox" v-model="result.checked" /></td>
+          <td
+            v-bind:class="(result.checked == false) ? 'gray' : ''"
+          >
+            {{ result.name }}
+          </td>
+          <td
+            v-bind:class="(result.checked == false) ? 'gray' : ''"
+          >
+            {{ result.amount }}
+          </td>
         </tr>
       </tbody>
     </table>
@@ -63,12 +79,22 @@ export default {
         this.error = true
       })
       console.log(response.data)
+      response.data.forEach(element => {
+        element.checked = true
+      })
       this.isLoading = false
       this.results = response.data
     },
     checkUrl: function () {
       // 語頭が白ごはんかyoutubeなのを確認する
       return this.inputUrl.startsWith('https://')
+    },
+    sortByChecked: function () {
+      this.results.sort(function (a, b) {
+        if(a.checked>b.checked) return -1;
+        if(a.checked < b.checked) return 1;
+        return 0;
+      })
     }
   }
 }
@@ -88,6 +114,10 @@ ul {
 table {
   margin-left: auto;
   margin-right: auto;
+}
+
+.gray {
+  color: #eeeeee;
 }
 
 .loader {
