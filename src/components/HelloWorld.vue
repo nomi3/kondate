@@ -13,30 +13,45 @@
     <button v-if="urls.length" v-on:click="createList">create kaimono list</button>
     <div v-show="isLoading" class="loader">Loading...</div>
     <p v-show="error">Some error occured...</p>
-    <table v-if="results.length">
-      <thead>
-        <tr>
-          <th @click="sortByChecked">▼</th>
-          <th>name</th>
-          <th>amount</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(result, index) in results" :key="index">
-          <td><input type="checkbox" v-model="result.checked" /></td>
-          <td
-            v-bind:class="(result.checked == false) ? 'gray' : ''"
-          >
-            {{ result.name }}
-          </td>
-          <td
-            v-bind:class="(result.checked == false) ? 'gray' : ''"
-          >
-            {{ result.amount }}
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div v-if="titles.length">
+      <h2>Titles</h2>
+      <table>
+        <tbody>
+          <tr v-for="(title, index) in titles" :key="index">
+            <td>
+              {{ title }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div v-if="results.length">
+      <h2>Kaimono List</h2>
+      <table>
+        <thead>
+          <tr>
+            <th @click="sortByChecked">▼</th>
+            <th>name</th>
+            <th>amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(result, index) in results" :key="index">
+            <td><input type="checkbox" v-model="result.checked" /></td>
+            <td
+              v-bind:class="(result.checked == false) ? 'gray' : ''"
+            >
+              {{ result.name }}
+            </td>
+            <td
+              v-bind:class="(result.checked == false) ? 'gray' : ''"
+            >
+              {{ result.amount }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>
 
@@ -49,6 +64,7 @@ export default {
       inputUrl: '',
       urls: [],
       results: [],
+      titles: [],
       isLoading: false,
       error: false
     }
@@ -79,11 +95,12 @@ export default {
         this.error = true
       })
       console.log(response.data)
-      response.data.forEach(element => {
+      response.data.recipes.forEach(element => {
         element.checked = true
       })
       this.isLoading = false
-      this.results = response.data
+      this.results = response.data.recipes
+      this.titles = response.data.titles
     },
     checkUrl: function () {
       // 語頭が白ごはんかyoutubeなのを確認する
