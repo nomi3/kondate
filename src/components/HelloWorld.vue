@@ -5,8 +5,8 @@
     <table>
       <tbody>
         <tr v-for="(url, index) in urls" :key="index">
-            <td>{{ url }}</td>
-            <td><button v-on:click="deleteItem(item)">delete</button></td>
+          <td>{{ url }}</td>
+          <td><button v-on:click="deleteItem(index)">delete</button></td>
         </tr>
       </tbody>
     </table>
@@ -79,16 +79,15 @@ export default {
         alert('白ごはん.comかYouTubeのURLを入力してください');
       }
     },
-    deleteItem: function (item) {
+    deleteItem: function (index) {
       this.error = false
-      var index = this.urls.indexOf(item)
       this.urls.splice(index, 1)
     },
     createList: async function () {
       console.log('kondate!')
       this.error = false
       this.isLoading = true
-      const response = await axios.post('https://kondate-api.herokuapp.com/test', {
+      const response = await axios.post('https://kondate-api.herokuapp.com/make_list', {
         urls: this.urls
       }).catch(() => {
         this.isLoading = false
