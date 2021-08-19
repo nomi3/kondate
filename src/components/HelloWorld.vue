@@ -2,29 +2,16 @@
   <div>
     <input v-model="inputUrl" placeholder="url here">
     <button v-on:click="addItem">add url</button>
+    <div v-show="isLoading" class="loader">Loading...</div>
     <table>
       <tbody>
-        <tr v-for="(url, index) in urls" :key="index">
-          <td>{{ url }}</td>
+        <tr v-for="(title, index) in titles" :key="index">
+          <td><a v-bind:href="title.url" target="_blank" rel="noopener noreferrer">{{ title.title }}</a></td>
           <td><button v-on:click="deleteItem(index)">delete</button></td>
         </tr>
       </tbody>
     </table>
-    <button v-if="urls.length" v-on:click="createList">create kaimono list</button>
-    <div v-show="isLoading" class="loader">Loading...</div>
     <p v-show="error">Some error occured...</p>
-    <div v-if="titles.length">
-      <h2>Titles</h2>
-      <table>
-        <tbody>
-          <tr v-for="(title, index) in titles" :key="index">
-            <td>
-              {{ title }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
     <div v-if="results.length">
       <h2>Kaimono List</h2>
       <table>
@@ -74,6 +61,7 @@ export default {
       this.error = false
       if (this.checkUrl()) {
         this.urls.unshift(this.inputUrl)
+        this.makeList()
         this.inputUrl = ''
       } else {
         alert('白ごはん.comかYouTubeのURLを入力してください');
@@ -82,28 +70,37 @@ export default {
     deleteItem: function (index) {
       this.error = false
       this.urls.splice(index, 1)
+      this.makeList()
     },
-    createList: async function () {
-      console.log('kondate!')
-      this.error = false
-      this.isLoading = true
-      const response = await axios.post('https://kondate-api.herokuapp.com/make_list', {
-        urls: this.urls
-      }).catch(() => {
+    makeList: async function () {
+      if (this.urls.length) {
+        this.isLoading = true
+        const response = await axios.post('https://kondate-api.herokuapp.com/make_list', {
+          urls: this.urls
+        }).catch(() => {
+          this.isLoading = false
+          this.error = true
+        })
+        response.data.recipes.forEach(element => {
+          element.checked = true
+        })
         this.isLoading = false
-        this.error = true
-      })
-      console.log(response.data)
-      response.data.recipes.forEach(element => {
-        element.checked = true
-      })
-      this.isLoading = false
-      this.results = response.data.recipes
-      this.titles = response.data.titles
+        this.results = response.data.recipes
+        this.titles = response.data.titles
+      } else {
+        this.results =[]
+        this.titles = []
+      }
     },
     checkUrl: function () {
-      // 語頭が白ごはんかyoutubeなのを確認する
-      return this.inputUrl.startsWith('https://')
+      if (this.inputUrl.startsWith('https://www.sirogohan.com/')
+        || this.inputUrl.startsWith('https://www.youtube.com/')
+        || this.inputUrl.startsWith('https://youtu.be/')
+      ) {
+        return true
+      } else {
+        return false
+      }
     },
     sortByChecked: function () {
       this.results.sort(function (a, b) {
