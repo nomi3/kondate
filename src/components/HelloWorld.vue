@@ -75,7 +75,8 @@ export default {
     makeList: async function () {
       if (this.urls.length) {
         this.isLoading = true
-        const response = await axios.post('https://kondate-api.herokuapp.com/make_list', {
+        const apiUrl = process.env.VUE_APP_API_BASE_URL
+        const response = await axios.post(apiUrl+'make_list', {
           urls: this.urls
         }).catch(() => {
           this.isLoading = false
