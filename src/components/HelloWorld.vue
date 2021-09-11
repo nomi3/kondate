@@ -3,16 +3,26 @@
     <input v-model="inputUrl" placeholder="url here">
     <button v-on:click="addItem">add url</button>
     <div v-show="isLoading" class="loader">Loading...</div>
-    <table>
-      <tbody>
-        <tr v-for="(title, index) in titles" :key="index">
-          <td><a v-bind:href="title.url" target="_blank" rel="noopener noreferrer">{{ title.title }}</a></td>
-          <td><button v-on:click="deleteItem(index)">delete</button></td>
-        </tr>
-      </tbody>
-    </table>
+    <div v-for="(result, index) in results" :key="index">
+      <a v-bind:href="result.url" target="_blank" rel="noopener noreferrer">{{ result.title }}</a>
+      <button v-on:click="deleteItem(index)">delete</button>
+      <table>
+        <thead>
+          <tr>
+            <th>name</th>
+            <th>amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(ingredient, index) in result.ingredients" :key="index">
+            <td>{{ ingredient.name }}</td>
+            <td>{{ ingredient.amount }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     <p v-show="error">Some error occured...</p>
-    <div v-if="results.length">
+    <div v-if="totalIngredients.length">
       <h2>Kaimono List</h2>
       <table>
         <thead>
@@ -23,17 +33,17 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(result, index) in results" :key="index">
-            <td><input type="checkbox" v-model="result.checked" /></td>
+          <tr v-for="(totalIngredient, index) in totalIngredients" :key="index">
+            <td><input type="checkbox" v-model="totalIngredient.checked" /></td>
             <td
-              v-bind:class="(result.checked == false) ? 'gray' : ''"
+              v-bind:class="(totalIngredient.checked == false) ? 'gray' : ''"
             >
-              {{ result.name }}
+              {{ totalIngredient.name }}
             </td>
             <td
-              v-bind:class="(result.checked == false) ? 'gray' : ''"
+              v-bind:class="(totalIngredient.checked == false) ? 'gray' : ''"
             >
-              {{ result.amount }}
+              {{ totalIngredient.amount }}
             </td>
           </tr>
         </tbody>
@@ -51,7 +61,7 @@ export default {
       inputUrl: '',
       urls: [],
       results: [],
-      titles: [],
+      totalIngredients: [],
       isLoading: false,
       error: false
     }
@@ -82,15 +92,12 @@ export default {
           this.isLoading = false
           this.error = true
         })
-        response.data.recipes.forEach(element => {
-          element.checked = true
-        })
         this.isLoading = false
-        this.results = response.data.recipes
-        this.titles = response.data.titles
+        this.results = response.data
+        this.mergeIngredients()
       } else {
-        this.results =[]
-        this.titles = []
+        this.results = []
+        this.totalIngredients = []
       }
     },
     checkUrl: function () {
@@ -104,10 +111,29 @@ export default {
       }
     },
     sortByChecked: function () {
-      this.results.sort(function (a, b) {
+      this.totalIngredients.sort(function (a, b) {
         if(a.checked>b.checked) return -1;
         if(a.checked < b.checked) return 1;
         return 0;
+      })
+    },
+    mergeIngredients: function () {
+      this.totalIngredients = []
+      this.results.forEach(result => {
+        result.ingredients.forEach(ingredient => {
+          ingredient.checked = true
+          let flgDuplicate = false
+          for(let i = 0 ; i < this.totalIngredients.length ; i ++ ) {
+            if (this.totalIngredients[i].name === ingredient.name) {
+              this.totalIngredients[i].amount += (' & ' + ingredient.amount)
+              flgDuplicate = true
+              break
+            }
+          }
+          if (!flgDuplicate) {
+            this.totalIngredients.unshift(ingredient)
+          }
+        })
       })
     }
   }
