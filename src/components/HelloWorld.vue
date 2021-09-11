@@ -135,7 +135,6 @@ export default {
           }
         })
       })
-      console.log(this.totalIngredients)
     }
   }
 }
